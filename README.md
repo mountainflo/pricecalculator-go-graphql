@@ -36,3 +36,21 @@ Response:
   }
 }
 ```
+
+Current GraphQL-API implemented:
+```
+type RootQuery {
+    calculate(type: CalcType): Item
+}
+
+enum CalcType {
+  RENTAL
+  LEASING
+}
+
+input Item {
+  id: Int
+  name: string
+  discout_perc: float
+}
+```
