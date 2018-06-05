@@ -16,15 +16,30 @@ var (
 
 func initGraphQl(){
 
+	//for converting the input to a user object
 	var userType = graphql.NewObject(
 		graphql.ObjectConfig{
 			Name: "User",
 			Fields: graphql.Fields{
 				"id": &graphql.Field{
-					Type: graphql.String,
+					Type: graphql.NewNonNull(graphql.Int),
+					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+						user, ok := p.Source.(user)
+						if ok {
+							return user.ID, nil
+						}
+						return nil, nil
+					},
 				},
 				"name": &graphql.Field{
-					Type: graphql.String,
+					Type: graphql.NewNonNull(graphql.Int),
+					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+						user, ok := p.Source.(user)
+						if ok {
+							return user.Name, nil
+						}
+						return nil, nil
+					},
 				},
 			},
 		},
@@ -45,7 +60,6 @@ func initGraphQl(){
 						idQuery, isOK := p.Args["id"].(string)
 						if isOK {
 							return doSomethingFancy(idQuery)
-							//return data[idQuery], nil
 						}
 						return nil, nil
 					},
