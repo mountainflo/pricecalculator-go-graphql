@@ -1,8 +1,15 @@
-## Please note
+## Run local
 
-You have to run the whole project not only the main function!
+Please note: You have to run the whole project not only the main function!
 
-Input:
+
+## Test with GraphiQL
+
+* For testing use GraphiQL [https://electronjs.org/apps/graphiql](https://electronjs.org/apps/graphiql)
+* GraphQL Endpoint: "http://localhost:8080/graphql"
+* Method: GET
+
+Request:
 
 ```
 {
@@ -12,6 +19,20 @@ Input:
     discout_perc
   }
 }
-
-
 ``
+
+If you for example only want ```id``` and ```name``` back, you can delete ```discout_perc``` from the request.
+
+
+Response:
+```
+{
+  "data": {
+    "calculate": {
+      "discout_perc": 1.5,
+      "id": 1,
+      "name": "asdf"
+    }
+  }
+}
+```
