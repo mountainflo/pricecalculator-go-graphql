@@ -1,4 +1,4 @@
-package pricecalculator_go_graphql
+package main
 
 
 import (

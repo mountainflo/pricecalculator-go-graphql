@@ -1,4 +1,4 @@
-package pricecalculator_go_graphql
+package main
 
 import (
 "net/http"
@@ -7,8 +7,9 @@ import (
 )
 
 
-
 func main() {
+
+	initGraphQl()
 
 	h := handler.New(&handler.Config{
 		Schema: &pricecalculationSchema,
