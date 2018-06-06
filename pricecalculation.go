@@ -4,6 +4,7 @@ package main
 import (
 	"github.com/graphql-go/graphql"
 	"encoding/json"
+	"fmt"
 )
 
 type Item struct {
@@ -154,14 +155,14 @@ func initGraphQl(){
 			Name: "Query",
 			Fields: graphql.Fields{
 				"calculate": &graphql.Field{
-					Type: blah,	//result of the request
+					Type: graphql.NewList(blah),	//result of the request
 					//Type: graphql.NewList(Item),	//result of the request
 					Args: graphql.FieldConfigArgument{
 						"type": &graphql.ArgumentConfig{
 							Type: calcTypeEnum,
 						},
 						"blah": &graphql.ArgumentConfig{
-							Type: blahInput,
+							Type: graphql.NewList(blahInput),
 							//Type: graphql.NewList(Item),
 						},
 					},
@@ -171,10 +172,14 @@ func initGraphQl(){
 
 						//print input of graphql
 						rJSON, _ := json.Marshal(p.Args["blah"])
-						result := Blah{}
+						fmt.Printf("%s \n", rJSON) // {“data”:{“hello”:”world”}}
+						result := []Blah{}
 						err := json.Unmarshal(rJSON, &result)
 						print("result.Id: ")
-						println(result.Id)
+						println(result[0].Id)
+
+						println(typeIsOK)
+						println(err == nil)
 
 						if typeIsOK && err == nil {
 							//do the calculation it input was correct
@@ -192,14 +197,20 @@ func initGraphQl(){
 	})
 }
 
-func calculatePriceForItem(typeQuery CalcType, itemQuery Blah) (interface{}, error) {
+func calculatePriceForItem(typeQuery CalcType, itemQuery []Blah) ([]Blah, error) {
 
 	//TODO calculate price
 
 	//print(itemQuery)
 
 	//return Item{ID:itemQuery.ID, Name:itemQuery.Name, discout_perc:itemQuery.discout_perc}, nil
-	return Blah{Id:itemQuery.Id, Name:itemQuery.Name}, nil
+
+	result := []Blah{{Id:itemQuery[0].Id, Name:itemQuery[0].Name}}
+
+	print("result.Name: ")
+	println(result[0].Name)
+
+	return result, nil
 }
 
 
@@ -207,10 +218,10 @@ func calculatePriceForItem(typeQuery CalcType, itemQuery Blah) (interface{}, err
 	TEST with
 
 		{
-		  calculate(type: RENTAL, blah: {Id: "blahContent", Name: "blahNameConten"}) {
-			Id
-			Name
-		  }
+			calculate(type: RENTAL, blah: [{Id: "blahContent", Name: "blahNameConten"}]) {
+				Id
+				Name
+			 }
 		}
 
  */
