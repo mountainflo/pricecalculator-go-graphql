@@ -169,18 +169,3 @@ func calculatePriceForItem(typeQuery CalcType, itemQuery []Item) ([]Item, error)
 
 	return result, nil
 }
-
-
-/*
-	TEST with
-
-		{
-		  calculate(type: RENTAL, item: [{Id: 3, Name: "blahNameConten", Discout_perc: 5.3}]) {
-			Id
-			Name
-			Discout_perc
-		  }
-		}
-
-
- */
