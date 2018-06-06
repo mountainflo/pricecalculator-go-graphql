@@ -4,18 +4,12 @@ package main
 import (
 	"github.com/graphql-go/graphql"
 	"encoding/json"
-	"fmt"
 )
 
 type Item struct {
-	id   int
-	name string
-	discout_perc float32
-}
-
-type Blah struct {
-	Id   string   `json:"id"`
-	Name   string `json:"name"`
+	Id   int	`json:"Id"`
+	Name string	`json:"Name"`
+	Discout_perc float32	`json:"Discout_perc"`
 }
 
 type CalcType int
@@ -32,100 +26,65 @@ var (
 func initGraphQl(){
 
 	/*
-		for converting the input to an Item object
-
-		input Item {
-  			id: Int
-  			name: String
-		}
+		for converting the output to an Item object
 	 */
-	/*var item = graphql.NewObject(graphql.ObjectConfig{
+	var item = graphql.NewObject(graphql.ObjectConfig{
 			Name: "item",
 			Fields: graphql.Fields{
-				"id": &graphql.Field{
+				"Id": &graphql.Field{
 					Type: graphql.NewNonNull(graphql.Int),	//NewNonNull if really necessary
 					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 						item, ok := p.Source.(Item)
 						if ok {
-							return item.id, nil
+							return item.Id, nil
 						}
 						return nil, nil
 					},
 				},
-				"name": &graphql.Field{
+				"Name": &graphql.Field{
 					Type: graphql.String,
 					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 						item, ok := p.Source.(Item)
 						if ok {
-							return item.name, nil
+							return item.Name, nil
 						}
 						return nil, nil
 					},
 				},
-				"discout_perc": &graphql.Field{
+				"Discout_perc": &graphql.Field{
 					Type: graphql.Float,
 					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 						item, ok := p.Source.(Item)
 						if ok {
-							return item.discout_perc, nil
+							return item.Discout_perc, nil
 						}
 						return nil, nil
 					},
 				},
 			},
 		},
-	)*/
-
-	var blah = graphql.NewObject(graphql.ObjectConfig{
-		Name: "blah",
-		Fields: graphql.Fields{
-			"Id": &graphql.Field{
-				Type: graphql.String,	//NewNonNull if really necessary
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					blah, ok := p.Source.(Blah)
-					if ok {
-						return blah.Id, nil
-					}
-					return "ERROR", nil
-				},
-			},
-			"Name": &graphql.Field{
-				Type: graphql.String,	//NewNonNull if really necessary
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-					blah, ok := p.Source.(Blah)
-					if ok {
-						return blah.Name, nil
-					}
-					return "ERROR", nil
-				},
-			},
-		},
-	},
 	)
 
-	var blahInput = graphql.NewInputObject(
+
+	/*
+	 	converting input to an item
+	 */
+	var itemInput = graphql.NewInputObject(
 		graphql.InputObjectConfig{
-			Name: "MyInputType",
+			Name: "itemInput",
 			Fields: graphql.InputObjectConfigFieldMap{
 				"Id": &graphql.InputObjectFieldConfig{
-					Type: graphql.String,
+					Type: graphql.Int,
 				},
 				"Name": &graphql.InputObjectFieldConfig{
 					Type: graphql.String,
 				},
-			},
-		},
-	)
-
-	/*var blahInput = graphql.NewInputObject(graphql.InputObjectConfig{
-			Name: "MyInputType",
-			Fields: graphql.InputObjectConfigFieldMap{
-				"key": &graphql.InputObjectFieldConfig{
-					Type: graphql.String,
+				"Discout_perc": &graphql.InputObjectFieldConfig{
+					Type: graphql.Float,
 				},
 			},
 		},
-		)*/
+	)
 
 	/*
 		enum CalcType {
@@ -146,40 +105,41 @@ func initGraphQl(){
 		},
 	})
 
+
 	/*
-		type RootQuery {
-			calculate(type: CalcType, items [Item], family_discount: Int): [Item]
+		Create the root query with:
+
+		{
+		  calculate( ... ) {
+			...
+		  }
 		}
+
 	 */
 	var rootQuery = graphql.NewObject(graphql.ObjectConfig{
 			Name: "Query",
 			Fields: graphql.Fields{
 				"calculate": &graphql.Field{
-					Type: graphql.NewList(blah),	//result of the request
-					//Type: graphql.NewList(Item),	//result of the request
+					Type: graphql.NewList(item),	//result-type for the response
 					Args: graphql.FieldConfigArgument{
 						"type": &graphql.ArgumentConfig{
 							Type: calcTypeEnum,
 						},
-						"blah": &graphql.ArgumentConfig{
-							Type: graphql.NewList(blahInput),
-							//Type: graphql.NewList(Item),
+						"item": &graphql.ArgumentConfig{
+							Type: graphql.NewList(itemInput),	//Input type of the request
 						},
 					},
 					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 						//get the values from the request
 						typeQuery, typeIsOK := p.Args["type"].(CalcType)
 
-						//print input of graphql
-						rJSON, _ := json.Marshal(p.Args["blah"])
-						fmt.Printf("%s \n", rJSON) // {“data”:{“hello”:”world”}}
-						result := []Blah{}
-						err := json.Unmarshal(rJSON, &result)
-						print("result.Id: ")
-						println(result[0].Id)
 
-						println(typeIsOK)
-						println(err == nil)
+						//convert input to []Item{}-Object
+						//not the best solution but works
+						rJSON, _ := json.Marshal(p.Args["item"])
+						//fmt.Printf("%s \n", rJSON)
+						result := []Item{}
+						err := json.Unmarshal(rJSON, &result)
 
 						if typeIsOK && err == nil {
 							//do the calculation it input was correct
@@ -197,18 +157,15 @@ func initGraphQl(){
 	})
 }
 
-func calculatePriceForItem(typeQuery CalcType, itemQuery []Blah) ([]Blah, error) {
+func calculatePriceForItem(typeQuery CalcType, itemQuery []Item) ([]Item, error) {
 
 	//TODO calculate price
 
-	//print(itemQuery)
+	//create the array result with all items
+	result := []Item{{Id:itemQuery[0].Id, Name:itemQuery[0].Name, Discout_perc:itemQuery[0].Discout_perc}}
 
-	//return Item{ID:itemQuery.ID, Name:itemQuery.Name, discout_perc:itemQuery.discout_perc}, nil
-
-	result := []Blah{{Id:itemQuery[0].Id, Name:itemQuery[0].Name}}
-
-	print("result.Name: ")
-	println(result[0].Name)
+	//print("result.Name: ")
+	//println(result[0].Name)
 
 	return result, nil
 }
@@ -218,10 +175,12 @@ func calculatePriceForItem(typeQuery CalcType, itemQuery []Blah) ([]Blah, error)
 	TEST with
 
 		{
-			calculate(type: RENTAL, blah: [{Id: "blahContent", Name: "blahNameConten"}]) {
-				Id
-				Name
-			 }
+		  calculate(type: RENTAL, item: [{Id: 3, Name: "blahNameConten", Discout_perc: 5.3}]) {
+			Id
+			Name
+			Discout_perc
+		  }
 		}
+
 
  */

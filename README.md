@@ -13,34 +13,35 @@ Request:
 
 ```
 {
-  calculate(type: RENTAL) {
-    id
-    name
-    discout_perc
+  calculate(type: RENTAL, item: [{Id: 3, Name: "FancySkiName", Discout_perc: 5.3}]) {
+    Id
+    Name
+    Discout_perc
   }
 }
 ```
 
 If you for example only want ```id``` and ```name``` back, you can delete ```discout_perc``` from the request.
 
-
 Response:
 ```
 {
   "data": {
-    "calculate": {
-      "discout_perc": 1.5,
-      "id": 1,
-      "name": "asdf"
-    }
+    "calculate": [
+      {
+        "Discout_perc": 5.3,
+        "Id": 3,
+        "Name": "blahNameConten"
+      }
+    ]
   }
 }
 ```
 
-Current GraphQL-API implemented:
+## Current GraphQL-API
 ```
 type RootQuery {
-    calculate(type: CalcType): Item
+    calculate(type: CalcType, item: [Item]): [Item]
 }
 
 enum CalcType {
@@ -49,8 +50,8 @@ enum CalcType {
 }
 
 input Item {
-  id: Int
-  name: string
-  discout_perc: float
+  Id: Int
+  Name: string
+  Discout_perc: float
 }
 ```
